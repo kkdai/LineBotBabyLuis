@@ -22,9 +22,14 @@ import (
 )
 
 var bot *linebot.Client
+var luisAction *LuisAction
 
 func main() {
 	var err error
+	APPID := os.Getenv("APP_ID")
+	API_KEY := os.Getenv("SUB_KEY")
+	luisAction = NewLuisAction(APPID, API_KEY)
+
 	bot, err = linebot.New(os.Getenv("ChannelSecret"), os.Getenv("ChannelAccessToken"))
 	log.Println("Bot:", bot, " err:", err)
 	http.HandleFunc("/callback", callbackHandler)
