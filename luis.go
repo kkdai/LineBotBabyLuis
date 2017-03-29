@@ -16,8 +16,13 @@ func NewLuisAction(api string, appid string) *LuisAction {
 }
 
 //GetIntents :
-func (l *LuisAction) GetIntents() {
-
+func (l *LuisAction) GetIntents() (*luis.IntentListResponse, *luis.ErrorResponse) {
+	res, err := l.LuisAPI.IntentList()
+	if err != nil {
+		return nil, err
+	}
+	result := luis.NewIntentListResponse(res)
+	return result, nil
 }
 
 // APPID = os.Getenv("APP_ID")
