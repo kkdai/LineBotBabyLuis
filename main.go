@@ -52,19 +52,18 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, event := range events {
 		if event.Type == linebot.EventTypeMessage {
-			switch message := event.Message.(type) {
+			switch event.Message.(type) {
 			case *linebot.TextMessage:
-				if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.ID+":"+message.Text+" OK!")).Do(); err != nil {
-					log.Print(err)
-				}
-
+				// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.ID+":"+message.Text+" OK!")).Do(); err != nil {
+				// 	log.Print(err)
+				// }
 				ListAllIntents(bot, event.ReplyToken)
 			}
 		}
 	}
 }
 
-func ListAllIntents(bot *linebot.Client, replyToken string) error {
+func ListAllIntents(bot *linebot.Client, replyToken string) {
 
 	template := linebot.NewButtonsTemplate(
 		"", "My button sample", "Hello, my button",
@@ -76,7 +75,6 @@ func ListAllIntents(bot *linebot.Client, replyToken string) error {
 	if _, err := bot.ReplyMessage(
 		replyToken,
 		linebot.NewTemplateMessage("Buttons alt text", template)).Do(); err != nil {
-		return err
+		log.Print(err)
 	}
-	return nil
 }
