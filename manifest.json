@@ -1,7 +1,0 @@
-{
-    "dependencies": {
-        "github.com/line/line-bot-sdk-go": {
-            "branch": "master"
-        }
-    }
-}
