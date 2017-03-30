@@ -78,7 +78,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					ListAllIntents(bot, event.ReplyToken, intentList, message.Text)
 
 				} else {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to %s (%d %)", ret.Name, int(ret.Score*100)))).Do(); err != nil {
+					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to %s (%d %%)", ret.Name, int(ret.Score*100)))).Do(); err != nil {
 						log.Print(err)
 					}
 				}
@@ -109,13 +109,6 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 
 	template := linebot.NewButtonsTemplate("", "Select your intent for your baby", utterance, sliceTemplateAction...)
 
-	// template := linebot.NewButtonsTemplate("", "Select your intent for your baby", utterance,
-	// 	linebot.NewPostbackTemplateAction(intents[0], intents[0], ""),
-	// 	linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
-	// 	linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
-	// 	linebot.NewPostbackTemplateAction(intents[3], intents[3], ""))
-
-	//	if _, err := bot.ReplyMessage(replyToken, linebot.NewTemplateMessage("test....", template)).Do(); err != nil {
 	if _, err := bot.ReplyMessage(
 		replyToken,
 		linebot.NewTemplateMessage("Select your intent for your baby", template)).Do(); err != nil {

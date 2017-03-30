@@ -28,7 +28,7 @@ func (l *LuisAction) GetIntents() (*luis.IntentListResponse, *luis.ErrorResponse
 	return result, nil
 }
 
-//AddUtterance :
+//AddUtterance :Add new example to your intent.
 func (l *LuisAction) AddUtterance(intent, utterance string) {
 	ex := luis.ExampleJson{ExampleText: utterance, SelectedIntentName: intent}
 	res, err := l.LuisAPI.AddLabel(ex)
@@ -41,7 +41,8 @@ func (l *LuisAction) AddUtterance(intent, utterance string) {
 	log.Println("Done AddUtterance:", string(res))
 }
 
-//Predict :
+//Predict :Predict your example(utterance).
+//Note: If your model never train before, use predict will get error.
 func (l *LuisAction) Predict(utterance string) luis.IntentsResultType {
 	//Predict it, once you have train your models.
 	res, err := l.LuisAPI.Predict(utterance)
@@ -56,7 +57,7 @@ func (l *LuisAction) Predict(utterance string) luis.IntentsResultType {
 	return bestResult
 }
 
-//Train :
+//Train :Train your model, this is async call. It might take time if your data set is big.
 func (l *LuisAction) Train() {
 	//Train it
 	res, err := l.LuisAPI.Train()
@@ -66,40 +67,3 @@ func (l *LuisAction) Train() {
 	}
 	log.Println("Training ret:", string(res))
 }
-
-// APPID = os.Getenv("APP_ID")
-// 	API_KEY = os.Getenv("API_KEY")
-
-// 	if API_KEY == "" {
-// 		fmt.Println("Please export your key to environment first, `export SUB_KEY=12234 && export APP_ID=5678`")
-
-// 	if API_KEY == "" {
-// 		return
-// 	}
-
-// 	e := getLuis(t)
-
-// 	res, err := e.IntelList()
-
-// 	if err != nil {
-// 		log.Error("Error happen on :", err.Err)
-// 	}
-// 	fmt.Println("Got response:", string(res))
-// 	result := NewIntentListResponse(res)
-// 	fmt.Println("Luis Intent Ret", result)
-
-// 	//Add utterances
-// 	ex := ExampleJson{ExampleText: "test", SelectedIntentName: "test2"}
-// 	res, err = e.AddLabel(ex)
-
-// 	//Train it
-// 	res, err = e.Train()
-
-// 	//Predict it, once you have train your models.
-// 		res, err := e.Predict("test string")
-
-// 	if err != nil {
-// 		log.Error("Error happen on :", err.Err)
-// 	}
-// 	fmt.Println("Got response:", string(res))
-// 	fmt.Println("Get the best predict result:", GetBestScoreIntent(NewPredictResponse(res)))
