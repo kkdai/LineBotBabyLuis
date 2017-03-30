@@ -33,7 +33,7 @@ func main() {
 	log.Println("Luis:", appID, apiKey)
 	// luisAction = NewLuisAction(appID, apiKey)
 	// res, err2 := luisAction.LuisAPI.IntentList()
-	l := luis.NewLuis(apiKey, appID)
+	l := luis.NewLuis(appID, apiKey)
 	res, err2 := l.IntentList()
 	result := luis.NewIntentListResponse(res)
 
