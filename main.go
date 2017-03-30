@@ -93,8 +93,8 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 	askStmt := fmt.Sprintf("Your utterance %s is not exist, please select correct intent.", utterance)
 	log.Println("askStmt:", askStmt)
 
-	template := linebot.NewButtonsTemplate("", "Please select your intent of your word", askStmt,
-		// template := linebot.NewButtonsTemplate("", "My button sample", "Hello, my button",
+	// template := linebot.NewButtonsTemplate("", "Please select your intent of your word", "test",
+	template := linebot.NewButtonsTemplate("", "Select your intent", askStmt,
 		linebot.NewPostbackTemplateAction(intents[0], intents[0], ""),
 		linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
 		linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
@@ -103,7 +103,7 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 	//	if _, err := bot.ReplyMessage(replyToken, linebot.NewTemplateMessage("test....", template)).Do(); err != nil {
 	if _, err := bot.ReplyMessage(
 		replyToken,
-		linebot.NewTemplateMessage(askStmt, template)).Do(); err != nil {
+		linebot.NewTemplateMessage("Select your intent", template)).Do(); err != nil {
 		log.Print(err)
 	}
 }
