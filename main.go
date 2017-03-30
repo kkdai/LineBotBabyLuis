@@ -68,10 +68,12 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					var intentList []string
 					log.Println("All intent:", *res)
 					for _, v := range *res {
-						intentList = append(intentList, v.Name)
+						if v.Name != "None" {
+							intentList = append(intentList, v.Name)
+						}
 					}
 
-					ListAllIntents(bot, event.ReplyToken, intentList)
+					ListAllIntents(bot, event.ReplyToken, intentList, message.Text)
 
 				} else {
 					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Hi Dady/Mam: I just want to :%s", ret))).Do(); err != nil {
@@ -84,27 +86,24 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //ListAllIntents :
-func ListAllIntents(bot *linebot.Client, replyToken string, intents []string) {
+func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, utterance string) {
 
 	// var buttons []linebot.TemplateAction
 
-	// askStmt := fmt.Sprintf("Your utterance %s is not exist, please select correct intent.", utterance)
-	// log.Println("askStmt:", askStmt)
+	askStmt := fmt.Sprintf("Your utterance %s is not exist, please select correct intent.", utterance)
+	log.Println("askStmt:", askStmt)
 
-	// template := linebot.NewButtonsTemplate("", "Please select your intent of your word", "test",
-	template := linebot.NewButtonsTemplate("", "My button sample", "Hello, my button",
+	template := linebot.NewButtonsTemplate("", "Please select your intent of your word", askStmt,
+		// template := linebot.NewButtonsTemplate("", "My button sample", "Hello, my button",
 		linebot.NewPostbackTemplateAction(intents[0], intents[0], ""),
-		// linebot.NewPostbackTemplateAction(intents[4], intents[4], ""),
-		// linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
-		// linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
-		// linebot.NewPostbackTemplateAction(intents[3], intents[3], ""))
-		linebot.NewPostbackTemplateAction("11", "2222", ""),
-		linebot.NewPostbackTemplateAction("22", "333", ""))
+		linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
+		linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
+		linebot.NewPostbackTemplateAction(intents[3], intents[3], ""))
 
 	//	if _, err := bot.ReplyMessage(replyToken, linebot.NewTemplateMessage("test....", template)).Do(); err != nil {
 	if _, err := bot.ReplyMessage(
 		replyToken,
-		linebot.NewTemplateMessage("Buttons alt text", template)).Do(); err != nil {
+		linebot.NewTemplateMessage(askStmt, template)).Do(); err != nil {
 		log.Print(err)
 	}
 }
