@@ -60,7 +60,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 			case *linebot.TextMessage:
 				ret := luisAction.Predict(message.Text)
 
-				if ret.Name == "None" || ret.Name == "" {
+				if ret.Name == "None" || ret.Name == "" || ret.Score < 0.5 {
 
 					res, err := luisAction.GetIntents()
 					if err != nil {
@@ -78,7 +78,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					ListAllIntents(bot, event.ReplyToken, intentList, message.Text)
 
 				} else {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to :%s (%f)", ret.Name, ret.Score))).Do(); err != nil {
+					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to %s (%d %)", ret.Name, ret.Score*100))).Do(); err != nil {
 						log.Print(err)
 					}
 				}
@@ -86,7 +86,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		} else if event.Type == linebot.EventTypePostback {
 			//Add new utterance into original intent
 			luisAction.AddUtterance(event.Postback.Data, currentUtterance)
-			retStr := fmt.Sprintf("Daddy/Mommy, I just learn new utterance :%s for intent: %s.", currentUtterance, event.Postback.Data)
+			retStr := fmt.Sprintf("Daddy/Mommy, I just learn new utterance %s for intent: %s.", currentUtterance, event.Postback.Data)
 			if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(retStr)).Do(); err != nil {
 				log.Print(err)
 			}
