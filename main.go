@@ -30,6 +30,7 @@ func main() {
 	var err error
 	appID := os.Getenv("APP_ID")
 	apiKey := os.Getenv("APP_KEY")
+	fmt.Println("Luis:", appID, apiKey)
 	luisAction = NewLuisAction(appID, apiKey)
 
 	bot, err = linebot.New(os.Getenv("ChannelSecret"), os.Getenv("ChannelAccessToken"))
