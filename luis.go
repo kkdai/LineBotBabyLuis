@@ -42,18 +42,18 @@ func (l *LuisAction) AddUtterance(intent, utterance string) {
 }
 
 //Predict :
-func (l *LuisAction) Predict(utterance string) string {
+func (l *LuisAction) Predict(utterance string) luis.IntentsResultType {
 	//Predict it, once you have train your models.
 	res, err := l.LuisAPI.Predict(utterance)
 
 	if err != nil {
 		log.Println("Error happen on Predict:", err.Err)
-		return ""
+		return luis.IntentsResultType{}
 	}
 	log.Println("Got response:", string(res))
 	bestResult := luis.GetBestScoreIntent(luis.NewPredictResponse(res))
 	fmt.Println("Get the best predict result:", bestResult)
-	return bestResult.Name
+	return bestResult
 }
 
 //Train :

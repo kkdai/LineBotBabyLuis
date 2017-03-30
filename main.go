@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kkdai/luis"
+	luis "github.com/kkdai/luis"
 	"github.com/line/line-bot-sdk-go/linebot"
 )
 
@@ -59,7 +59,8 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
 				ret := luisAction.Predict(message.Text)
-				if ret == "None" || ret == "" {
+
+				if ret.Name == "None" || ret.Name == "" {
 
 					res, err := luisAction.GetIntents()
 					if err != nil {
@@ -77,7 +78,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					ListAllIntents(bot, event.ReplyToken, intentList, message.Text)
 
 				} else {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Hi Dady/Mam: I just want to :%s", ret))).Do(); err != nil {
+					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to :%s (%f)", ret.Name, ret.Score))).Do(); err != nil {
 						log.Print(err)
 					}
 				}
@@ -85,7 +86,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		} else if event.Type == linebot.EventTypePostback {
 			//Add new utterance into original intent
 			luisAction.AddUtterance(event.Postback.Data, currentUtterance)
-			retStr := fmt.Sprintf("Your intent: %s already add new utterance :%s", event.Postback.Data, currentUtterance)
+			retStr := fmt.Sprintf("Daddy/Mommy, I just learn new utterance :%s for intent: %s.", currentUtterance, event.Postback.Data)
 			if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(retStr)).Do(); err != nil {
 				log.Print(err)
 			}
@@ -101,16 +102,23 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 	askStmt := fmt.Sprintf("Your utterance %s is not exist, please select correct intent.", utterance)
 	log.Println("askStmt:", askStmt)
 
-	template := linebot.NewButtonsTemplate("", "Select your intent", utterance,
-		linebot.NewPostbackTemplateAction(intents[0], intents[0], ""),
-		linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
-		linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
-		linebot.NewPostbackTemplateAction(intents[3], intents[3], ""))
+	var sliceTemplateAction []linebot.TemplateAction
+	for _, v := range intents {
+		sliceTemplateAction = append(sliceTemplateAction, linebot.NewPostbackTemplateAction(v, v, ""))
+	}
+
+	template := linebot.NewButtonsTemplate("", "Select your intent for your baby", utterance, sliceTemplateAction...)
+
+	// template := linebot.NewButtonsTemplate("", "Select your intent for your baby", utterance,
+	// 	linebot.NewPostbackTemplateAction(intents[0], intents[0], ""),
+	// 	linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
+	// 	linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
+	// 	linebot.NewPostbackTemplateAction(intents[3], intents[3], ""))
 
 	//	if _, err := bot.ReplyMessage(replyToken, linebot.NewTemplateMessage("test....", template)).Do(); err != nil {
 	if _, err := bot.ReplyMessage(
 		replyToken,
-		linebot.NewTemplateMessage("Select your intent", template)).Do(); err != nil {
+		linebot.NewTemplateMessage("Select your intent for your baby", template)).Do(); err != nil {
 		log.Print(err)
 	}
 	currentUtterance = utterance
