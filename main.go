@@ -30,7 +30,7 @@ func main() {
 	var err error
 	appID := os.Getenv("APP_ID")
 	apiKey := os.Getenv("APP_KEY")
-	fmt.Println("Luis:", appID, apiKey)
+	log.Println("Luis:", appID, apiKey)
 	luisAction = NewLuisAction(appID, apiKey)
 
 	bot, err = linebot.New(os.Getenv("ChannelSecret"), os.Getenv("ChannelAccessToken"))
@@ -67,7 +67,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 				}
 
 				var intentList []string
-				fmt.Println("All intent:", *res)
+				log.Println("All intent:", *res)
 				for _, v := range *res {
 					intentList = append(intentList, v.Name)
 				}
