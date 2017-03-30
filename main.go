@@ -88,14 +88,14 @@ func ListAllIntents(bot *linebot.Client, replyToken string, utterance string) {
 	log.Println("askStmt:", askStmt)
 
 	template := linebot.NewButtonsTemplate("", "Please select your intent of your word", askStmt,
-		linebot.NewPostbackTemplateAction(intents[4], intents[4], ""),
-		linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
-		linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
-		linebot.NewPostbackTemplateAction(intents[3], intents[3], ""))
+		// linebot.NewPostbackTemplateAction(intents[4], intents[4], ""),
+		// linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
+		// linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
+		// linebot.NewPostbackTemplateAction(intents[3], intents[3], ""))
+		linebot.NewPostbackTemplateAction("11", "2222", ""),
+		linebot.NewPostbackTemplateAction("22", "333", ""))
 
-	if _, err := bot.ReplyMessage(
-		replyToken,
-		linebot.NewTemplateMessage(askStmt, template)).Do(); err != nil {
+	if _, err := bot.ReplyMessage(replyToken, linebot.NewTemplateMessage(askStmt, template)).Do(); err != nil {
 		log.Print(err)
 	}
 }
