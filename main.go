@@ -78,7 +78,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					ListAllIntents(bot, event.ReplyToken, intentList, message.Text)
 
 				} else {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to %s (%d %)", ret.Name, ret.Score*100))).Do(); err != nil {
+					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to %s (%d %)", ret.Name, int(ret.Score*100)))).Do(); err != nil {
 						log.Print(err)
 					}
 				}
