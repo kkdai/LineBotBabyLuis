@@ -47,13 +47,24 @@ func (l *LuisAction) Predict(utterance string) string {
 	res, err := l.LuisAPI.Predict(utterance)
 
 	if err != nil {
-		log.Println("Error happen on :", err.Err)
+		log.Println("Error happen on Predict:", err.Err)
 		return ""
 	}
 	log.Println("Got response:", string(res))
 	bestResult := luis.GetBestScoreIntent(luis.NewPredictResponse(res))
 	fmt.Println("Get the best predict result:", bestResult)
 	return bestResult.Name
+}
+
+//Train :
+func (l *LuisAction) Train() {
+	//Train it
+	res, err := l.LuisAPI.Train()
+	if err != nil {
+		log.Println("Error happen on Trainning:", err.Err)
+		return
+	}
+	log.Println("Training ret:", string(res))
 }
 
 // APPID = os.Getenv("APP_ID")
