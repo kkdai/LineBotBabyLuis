@@ -85,6 +85,7 @@ func ListAllIntents(bot *linebot.Client, replyToken string, utterance string) {
 	}
 
 	askStmt := fmt.Sprintf("Your utterance %s is not exist, please select correct intent.", utterance)
+	log.Println("askStmt:", askStmt)
 
 	template := linebot.NewButtonsTemplate("", "Please select your intent of your word", askStmt,
 		linebot.NewPostbackTemplateAction(intents[4], intents[4], ""),
