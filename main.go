@@ -25,6 +25,7 @@ import (
 var bot *linebot.Client
 var luisAction *LuisAction
 var allIntents *luis.IntentListResponse
+var currentUtterance string
 
 func main() {
 	var err error
@@ -72,7 +73,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 							intentList = append(intentList, v.Name)
 						}
 					}
-
+					//List all intents
 					ListAllIntents(bot, event.ReplyToken, intentList, message.Text)
 
 				} else {
@@ -81,20 +82,23 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
+		} else if event.Type == linebot.EventTypePostback {
+			//Add new utterance into original intent
+			luisAction.AddUtterance(event.Postback.Data, currentUtterance)
+			retStr := fmt.Sprintf("Your intent: %s already add new utterance :%s", event.Postback.Data, currentUtterance)
+			if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(retStr)).Do(); err != nil {
+				log.Print(err)
+			}
 		}
 	}
 }
 
 //ListAllIntents :
 func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, utterance string) {
-
-	// var buttons []linebot.TemplateAction
-
 	askStmt := fmt.Sprintf("Your utterance %s is not exist, please select correct intent.", utterance)
 	log.Println("askStmt:", askStmt)
 
-	// template := linebot.NewButtonsTemplate("", "Please select your intent of your word", "test",
-	template := linebot.NewButtonsTemplate("", "Select your intent", "test",
+	template := linebot.NewButtonsTemplate("", "Select your intent", utterance,
 		linebot.NewPostbackTemplateAction(intents[0], intents[0], ""),
 		linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
 		linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
@@ -106,4 +110,5 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 		linebot.NewTemplateMessage("Select your intent", template)).Do(); err != nil {
 		log.Print(err)
 	}
+	currentUtterance = utterance
 }
