@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"log"
+
 	luis "github.com/kkdai/luis"
 )
 
@@ -23,6 +26,33 @@ func (l *LuisAction) GetIntents() (*luis.IntentListResponse, *luis.ErrorResponse
 	}
 	result := luis.NewIntentListResponse(res)
 	return result, nil
+}
+
+//AddUtterance :
+func (l *LuisAction) AddUtterance(intent, utterance string) {
+	ex := luis.ExampleJson{ExampleText: utterance, SelectedIntentName: intent}
+	res, err := l.LuisAPI.AddLabel(ex)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	log.Println("Done AddUtterance:", string(res))
+}
+
+//Predict :
+func (l *LuisAction) Predict(utterance string) string {
+	//Predict it, once you have train your models.
+	res, err := l.LuisAPI.Predict(utterance)
+
+	if err != nil {
+		log.Println("Error happen on :", err.Err)
+	}
+	log.Println("Got response:", string(res))
+	bestResult := luis.GetBestScoreIntent(luis.NewPredictResponse(res))
+	fmt.Println("Get the best predict result:", bestResult)
+	return bestResult.Name
 }
 
 // APPID = os.Getenv("APP_ID")

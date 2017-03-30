@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"os"
 
-	luis "github.com/kkdai/luis"
+	"github.com/kkdai/luis"
 	"github.com/line/line-bot-sdk-go/linebot"
 )
 
@@ -32,12 +32,6 @@ func main() {
 	apiKey := os.Getenv("APP_KEY")
 	log.Println("Luis:", appID, apiKey)
 	luisAction = NewLuisAction(appID, apiKey)
-	res, err2 := luisAction.LuisAPI.IntentList()
-	// l := luis.NewLuis(appID, apiKey)
-	// res, err2 := l.IntentList()
-	// result := luis.NewIntentListResponse(res)
-
-	log.Println(res, err2)
 
 	bot, err = linebot.New(os.Getenv("ChannelSecret"), os.Getenv("ChannelAccessToken"))
 	log.Println("Bot:", bot, " err:", err)
@@ -61,51 +55,46 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, event := range events {
 		if event.Type == linebot.EventTypeMessage {
-			switch event.Message.(type) {
+			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.ID+":"+message.Text+" OK!")).Do(); err != nil {
-				// 	log.Print(err)
-				// }
-
-				res, err := luisAction.GetIntents()
-				if err != nil {
-					log.Println(err)
-					return
+				ret := luisAction.Predict(message.Text)
+				if ret == "None" {
+					ListAllIntents(bot, event.ReplyToken, message.Text)
+				} else {
+					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Hi Dady/Mam: I just want to :%s", ret))).Do(); err != nil {
+						log.Print(err)
+					}
 				}
-
-				var intentList []string
-				log.Println("All intent:", *res)
-				for _, v := range *res {
-					intentList = append(intentList, v.Name)
-				}
-
-				ListAllIntents(bot, event.ReplyToken, intentList)
 			}
 		}
 	}
 }
 
 //ListAllIntents :
-func ListAllIntents(bot *linebot.Client, replyToken string, intents []string) {
+func ListAllIntents(bot *linebot.Client, replyToken string, utterance string) {
+	res, err := luisAction.GetIntents()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
-	// var buttons []linebot.TemplateAction
+	var intents []string
+	log.Println("All intent:", *res)
+	for _, v := range *res {
+		intents = append(intents, v.Name)
+	}
 
-	// for _, v := range intents {
-	// 	buttons = append(buttons, linebot.NewPostbackTemplateAction(v, v, ""))
-	// }
+	askStmt := fmt.Sprintf("Your utterance %s is not exist, please select correct intent.", utterance)
 
-	// linebot.NewURITemplateAction("Go to line.me", "https://line.me"),
-	// linebot.NewPostbackTemplateAction("Say hello1", "hello こんにちは", ""),
-
-	template := linebot.NewButtonsTemplate("", "My button sample", "Hello, my button",
-		linebot.NewPostbackTemplateAction(intents[0], intents[0], ""),
+	template := linebot.NewButtonsTemplate("", "Please select your intent of your word", askStmt,
+		linebot.NewPostbackTemplateAction(intents[4], intents[4], ""),
 		linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
 		linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
 		linebot.NewPostbackTemplateAction(intents[3], intents[3], ""))
 
 	if _, err := bot.ReplyMessage(
 		replyToken,
-		linebot.NewTemplateMessage("Buttons alt text", template)).Do(); err != nil {
+		linebot.NewTemplateMessage(askStmt, template)).Do(); err != nil {
 		log.Print(err)
 	}
 }
