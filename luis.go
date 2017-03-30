@@ -10,8 +10,8 @@ type LuisAction struct {
 }
 
 //NewLuisAction :
-func NewLuisAction(api string, appid string) *LuisAction {
-	l := luis.NewLuis(api, appid)
+func NewLuisAction(appid string, appkey string) *LuisAction {
+	l := luis.NewLuis(appid, appkey)
 	return &LuisAction{LuisAPI: l}
 }
 
