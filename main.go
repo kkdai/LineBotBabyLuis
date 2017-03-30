@@ -33,6 +33,9 @@ func main() {
 	log.Println("Luis:", appID, apiKey)
 	luisAction = NewLuisAction(appID, apiKey)
 
+	res, err2 := luisAction.LuisAPI.IntentList()
+	log.Println(res, err2)
+
 	bot, err = linebot.New(os.Getenv("ChannelSecret"), os.Getenv("ChannelAccessToken"))
 	log.Println("Bot:", bot, " err:", err)
 	http.HandleFunc("/callback", callbackHandler)
