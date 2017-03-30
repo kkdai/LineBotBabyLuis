@@ -18,17 +18,19 @@ import (
 	"net/http"
 	"os"
 
+	luis "github.com/kkdai/luis"
 	"github.com/line/line-bot-sdk-go/linebot"
 )
 
 var bot *linebot.Client
 var luisAction *LuisAction
+var allIntents *luis.IntentListResponse
 
 func main() {
 	var err error
-	APPID := os.Getenv("APP_ID")
-	API_KEY := os.Getenv("SUB_KEY")
-	luisAction = NewLuisAction(APPID, API_KEY)
+	appID := os.Getenv("APP_ID")
+	apiKey := os.Getenv("APP_KEY")
+	luisAction = NewLuisAction(appID, apiKey)
 
 	bot, err = linebot.New(os.Getenv("ChannelSecret"), os.Getenv("ChannelAccessToken"))
 	log.Println("Bot:", bot, " err:", err)
@@ -57,21 +59,42 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 				// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.ID+":"+message.Text+" OK!")).Do(); err != nil {
 				// 	log.Print(err)
 				// }
-				ListAllIntents(bot, event.ReplyToken)
+
+				res, err := luisAction.GetIntents()
+				if err != nil {
+					log.Println(err)
+				}
+
+				var intentList []string
+				fmt.Println("All intent:", *res)
+				for _, v := range *res {
+					intentList = append(intentList, v.Name)
+				}
+
+				ListAllIntents(bot, event.ReplyToken, intentList)
 			}
 		}
 	}
 }
 
-func ListAllIntents(bot *linebot.Client, replyToken string) {
+//ListAllIntents :
+func ListAllIntents(bot *linebot.Client, replyToken string, intents []string) {
 
-	template := linebot.NewButtonsTemplate(
-		"", "My button sample", "Hello, my button",
-		linebot.NewURITemplateAction("Go to line.me", "https://line.me"),
-		linebot.NewPostbackTemplateAction("Say hello1", "hello こんにちは", ""),
-		linebot.NewPostbackTemplateAction("言 hello2", "hello こんにちは", "hello こんにちは"),
-		linebot.NewMessageTemplateAction("Say message", "Rice=米"),
-	)
+	// var buttons []linebot.TemplateAction
+
+	// for _, v := range intents {
+	// 	buttons = append(buttons, linebot.NewPostbackTemplateAction(v, v, ""))
+	// }
+
+	// linebot.NewURITemplateAction("Go to line.me", "https://line.me"),
+	// linebot.NewPostbackTemplateAction("Say hello1", "hello こんにちは", ""),
+
+	template := linebot.NewButtonsTemplate("", "My button sample", "Hello, my button",
+		linebot.NewPostbackTemplateAction(intents[0], intents[0], ""),
+		linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
+		linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
+		linebot.NewPostbackTemplateAction(intents[3], intents[3], ""))
+
 	if _, err := bot.ReplyMessage(
 		replyToken,
 		linebot.NewTemplateMessage("Buttons alt text", template)).Do(); err != nil {
