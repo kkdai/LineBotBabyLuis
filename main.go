@@ -58,7 +58,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
 				ret := luisAction.Predict(message.Text)
-				if ret == "None" {
+				if ret == "None" || ret == "" {
 					ListAllIntents(bot, event.ReplyToken, message.Text)
 				} else {
 					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Hi Dady/Mam: I just want to :%s", ret))).Do(); err != nil {

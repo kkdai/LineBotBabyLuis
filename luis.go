@@ -48,6 +48,7 @@ func (l *LuisAction) Predict(utterance string) string {
 
 	if err != nil {
 		log.Println("Error happen on :", err.Err)
+		return ""
 	}
 	log.Println("Got response:", string(res))
 	bestResult := luis.GetBestScoreIntent(luis.NewPredictResponse(res))
