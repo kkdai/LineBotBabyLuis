@@ -94,7 +94,7 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 	log.Println("askStmt:", askStmt)
 
 	// template := linebot.NewButtonsTemplate("", "Please select your intent of your word", "test",
-	template := linebot.NewButtonsTemplate("", "Select your intent", askStmt,
+	template := linebot.NewButtonsTemplate("", "Select your intent", "test",
 		linebot.NewPostbackTemplateAction(intents[0], intents[0], ""),
 		linebot.NewPostbackTemplateAction(intents[1], intents[1], ""),
 		linebot.NewPostbackTemplateAction(intents[2], intents[2], ""),
