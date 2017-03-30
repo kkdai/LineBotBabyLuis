@@ -35,8 +35,9 @@ func main() {
 	// res, err2 := luisAction.LuisAPI.IntentList()
 	l := luis.NewLuis(apiKey, appID)
 	res, err2 := l.IntentList()
+	result := luis.NewIntentListResponse(res)
 
-	log.Println(res, err2)
+	log.Println(result, res, err2)
 
 	bot, err = linebot.New(os.Getenv("ChannelSecret"), os.Getenv("ChannelAccessToken"))
 	log.Println("Bot:", bot, " err:", err)
