@@ -11,7 +11,7 @@ type LuisAction struct {
 
 //NewLuisAction :
 func NewLuisAction(appid string, appkey string) *LuisAction {
-	l := luis.NewLuis(appid, appkey)
+	l := luis.NewLuis(appkey, appid)
 	return &LuisAction{LuisAPI: l}
 }
 

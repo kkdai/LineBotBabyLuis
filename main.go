@@ -31,13 +31,13 @@ func main() {
 	appID := os.Getenv("APP_ID")
 	apiKey := os.Getenv("APP_KEY")
 	log.Println("Luis:", appID, apiKey)
-	// luisAction = NewLuisAction(appID, apiKey)
-	// res, err2 := luisAction.LuisAPI.IntentList()
-	l := luis.NewLuis(appID, apiKey)
-	res, err2 := l.IntentList()
-	result := luis.NewIntentListResponse(res)
+	luisAction = NewLuisAction(appID, apiKey)
+	res, err2 := luisAction.LuisAPI.IntentList()
+	// l := luis.NewLuis(appID, apiKey)
+	// res, err2 := l.IntentList()
+	// result := luis.NewIntentListResponse(res)
 
-	log.Println(result, res, err2)
+	log.Println(res, err2)
 
 	bot, err = linebot.New(os.Getenv("ChannelSecret"), os.Getenv("ChannelAccessToken"))
 	log.Println("Bot:", bot, " err:", err)
@@ -70,6 +70,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 				res, err := luisAction.GetIntents()
 				if err != nil {
 					log.Println(err)
+					return
 				}
 
 				var intentList []string
