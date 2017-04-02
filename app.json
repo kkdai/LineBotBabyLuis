@@ -1,6 +1,6 @@
 {
   "name": "LineBotBabyLuis",
-  "description": "Line Bot API luis",
+  "description": "LineBot with luis feature in Go",
   "repository": "https://github.com/kkdai/LineBotBabyLuis",
   "keywords": [
     "Line",
