@@ -22,7 +22,7 @@ How to use it
 
 ### Add friend:
 
-![](http://qr-official.line.me/M/mr_Sif6SG6.png)
+![](images/qr.png)
 
 
 ### Teach your baby:
