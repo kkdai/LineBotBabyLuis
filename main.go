@@ -57,6 +57,14 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	for _, event := range events {
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
+			case *linebot.ImageMessage:
+				content, err := bot.GetMessageContent(message.ID).Do()
+				if err != nil {
+					log.Println("imageMsg err:", err)
+				}
+				defer content.Content.Close()
+				log.Println("Img content:", content)
+
 			case *linebot.TextMessage:
 				ret := luisAction.Predict(message.Text)
 
@@ -86,6 +94,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		} else if event.Type == linebot.EventTypePostback {
 			//Add new utterance into original intent
 			luisAction.AddUtterance(event.Postback.Data, currentUtterance)
+
 			retStr := fmt.Sprintf("Daddy/Mommy, I just learn new utterance %s for intent: %s.", currentUtterance, event.Postback.Data)
 			if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(retStr)).Do(); err != nil {
 				log.Print(err)
