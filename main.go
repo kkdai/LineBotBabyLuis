@@ -187,7 +187,7 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 		return nil, err
 	}
 
-	log.Println("Total file length:", len(b))
+	log.Printf("Total file length: %d \n", b.Len())
 	// Now that you have a form, you can submit it to your handler.
 	req, err := http.NewRequest("POST", "http://107.167.183.27:3000/api/v1/tf-image/", &b)
 	if err != nil {
