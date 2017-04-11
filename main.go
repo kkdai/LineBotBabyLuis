@@ -170,7 +170,18 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
-	fw, err := w.CreateFormFile("image", file.Name())
+
+	extraParams := map[string]string{
+		"title":       "My image",
+		"author":      "Matt Aimonetti",
+		"description": "A document with all the Go programming language secrets",
+	}
+
+	for key, val := range extraParams {
+		_ = w.WriteField(key, val)
+	}
+
+	fw, err := w.CreateFormFile("file", file.Name())
 	if err != nil {
 		log.Println(err)
 		return nil, err
