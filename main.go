@@ -179,19 +179,15 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 		log.Println(err)
 		return nil, err
 	}
-	// Add the other fields
-	if fw, err = w.CreateFormField("key"); err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	if _, err = fw.Write([]byte("KEY")); err != nil {
-		log.Println(err)
-		return nil, err
-	}
+
 	// Don't forget to close the multipart writer.
 	// If you don't close it, your request will be missing the terminating boundary.
-	w.Close()
+	if err = w.Close(); err != nil {
+		log.Println(err)
+		return nil, err
+	}
 
+	log.Println("Total file length:", len(b))
 	// Now that you have a form, you can submit it to your handler.
 	req, err := http.NewRequest("POST", "http://107.167.183.27:3000/api/v1/tf-image/", &b)
 	if err != nil {
