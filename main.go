@@ -14,6 +14,8 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -58,6 +60,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.ImageMessage:
+				HandleHeavyContent(message.ID)
 				content, err := bot.GetMessageContent(message.ID).Do()
 				if err != nil {
 					log.Println("imageMsg err:", err)
@@ -124,4 +127,52 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 		log.Print(err)
 	}
 	currentUtterance = utterance
+}
+
+//HandleHeavyContent :
+func HandleHeavyContent(messageID string) error {
+	content, err := bot.GetMessageContent(messageID).Do()
+	if err != nil {
+		log.Println("Get msg err:", err)
+		return err
+	}
+	defer content.Content.Close()
+	log.Printf("Got file: %s", content.ContentType)
+	_, err = SaveContent(content.Content)
+	if err != nil {
+		log.Println("Save file err:", err)
+		return err
+	}
+	return nil
+}
+
+//HandleImage :
+func HandleImage(message *linebot.ImageMessage, replyToken string) error {
+	return HandleHeavyContent(message.ID)
+}
+
+// SaveContent :
+func SaveContent(content io.ReadCloser) (*os.File, error) {
+
+	file, err := ioutil.TempFile("/tmp", "")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, content)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("Saved to %s", file.Name())
+
+	res, err := http.Post("http://107.167.183.27:3000/api/v1/tf-image", "binary/octet-stream", file)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+	message, _ := ioutil.ReadAll(res.Body)
+	fmt.Printf(string(message))
+
+	return file, nil
 }
