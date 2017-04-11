@@ -14,6 +14,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -30,6 +31,8 @@ var bot *linebot.Client
 var luisAction *LuisAction
 var allIntents *luis.IntentListResponse
 var currentUtterance string
+
+var APIURL string = "http://107.167.183.27:3000/api/v1/tf-image/"
 
 func main() {
 	var err error
@@ -132,29 +135,33 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 }
 
 //HandleHeavyContent :
-func HandleHeavyContent(messageID string) error {
+func HandleHeavyContent(messageID string) string {
 	content, err := bot.GetMessageContent(messageID).Do()
 	if err != nil {
 		log.Println("Get msg err:", err)
-		return err
+		return ""
 	}
 	defer content.Content.Close()
 	log.Printf("Got file: %s", content.ContentType)
 	_, err = SaveContent(content.Content)
 	if err != nil {
 		log.Println("Save file err:", err)
-		return err
+		return ""
 	}
-	return nil
+	return ""
 }
 
 //HandleImage :
 func HandleImage(message *linebot.ImageMessage, replyToken string) error {
-	return HandleHeavyContent(message.ID)
+	ret := HandleHeavyContent(message.ID)
+	if ret != "" {
+		return nil
+	}
+	return errors.New("No file")
 }
 
 // SaveContent :
-func SaveContent(content io.ReadCloser) (*os.File, error) {
+func SaveContent(content io.ReadCloser) ([]byte, error) {
 
 	file, err := ioutil.TempFile("/tmp", "")
 	if err != nil {
@@ -170,18 +177,7 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
-
-	extraParams := map[string]string{
-		"title":       "My image",
-		"author":      "Matt Aimonetti",
-		"description": "A document with all the Go programming language secrets",
-	}
-
-	for key, val := range extraParams {
-		_ = w.WriteField(key, val)
-	}
-
-	fw, err := w.CreateFormFile("file", file.Name())
+	fw, err := w.CreateFormFile("upload", file.Name())
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -200,7 +196,7 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 
 	log.Printf("Total file length: %d \n", b.Len())
 	// Now that you have a form, you can submit it to your handler.
-	req, err := http.NewRequest("POST", "http://107.167.183.27:3000/api/v1/tf-image/", &b)
+	req, err := http.NewRequest("POST", APIURL, &b)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -223,13 +219,12 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 		log.Println(err)
 	}
 
-	// res, err := http.Post("http://107.167.183.27:3000/api/v1/tf-image/", "binary/octet-stream", file)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer res.Body.Close()
-	// message, _ := ioutil.ReadAll(res.Body)
-	// fmt.Printf("Ret:%s", string(message))
+	defer res.Body.Close()
+	resp_body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
 
-	return file, nil
+	log.Println("Successed: ", string(resp_body))
+	return resp_body, nil
 }
