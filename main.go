@@ -172,16 +172,20 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 	w := multipart.NewWriter(&b)
 	fw, err := w.CreateFormFile("image", file.Name())
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	if _, err = io.Copy(fw, file); err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	// Add the other fields
 	if fw, err = w.CreateFormField("key"); err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	if _, err = fw.Write([]byte("KEY")); err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	// Don't forget to close the multipart writer.
@@ -191,21 +195,25 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 	// Now that you have a form, you can submit it to your handler.
 	req, err := http.NewRequest("POST", "http://107.167.183.27:3000/api/v1/tf-image/", &b)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	// Don't forget to set the content type, this will contain the boundary.
 	req.Header.Set("Content-Type", w.FormDataContentType())
+	log.Println("data content type:", w.FormDataContentType())
 
 	// Submit the request
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	// Check the response
 	if res.StatusCode != http.StatusOK {
 		err = fmt.Errorf("bad status: %s", res.Status)
+		log.Println(err)
 	}
 
 	// res, err := http.Post("http://107.167.183.27:3000/api/v1/tf-image/", "binary/octet-stream", file)
