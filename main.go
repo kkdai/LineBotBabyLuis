@@ -14,7 +14,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -65,13 +64,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.ImageMessage:
-				HandleHeavyContent(message.ID)
-				// // content, err := bot.GetMessageContent(message.ID).Do()
-				// // if err != nil {
-				// // 	log.Println("imageMsg err:", err)
-				// // }
-				// // defer content.Content.Close()
-				// log.Println("Img content:", content)
+				HandleImage(message, event.ReplyToken)
 
 			case *linebot.TextMessage:
 				ret := luisAction.Predict(message.Text)
@@ -134,55 +127,62 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 	currentUtterance = utterance
 }
 
-//HandleHeavyContent :
-func HandleHeavyContent(messageID string) string {
-	content, err := bot.GetMessageContent(messageID).Do()
+//HandleImage :
+func HandleImage(message *linebot.ImageMessage, replyToken string) error {
+	content, err := bot.GetMessageContent(message.ID).Do()
 	if err != nil {
 		log.Println("Get msg err:", err)
-		return ""
+		return err
 	}
 	defer content.Content.Close()
 	log.Printf("Got file: %s", content.ContentType)
-	_, err = SaveContent(content.Content)
-	if err != nil {
-		log.Println("Save file err:", err)
-		return ""
-	}
-	return ""
-}
-
-//HandleImage :
-func HandleImage(message *linebot.ImageMessage, replyToken string) error {
-	ret := HandleHeavyContent(message.ID)
-	if ret != "" {
-		return nil
-	}
-	return errors.New("No file")
-}
-
-// SaveContent :
-func SaveContent(content io.ReadCloser) ([]byte, error) {
 
 	file, err := ioutil.TempFile("/tmp", "")
 	if err != nil {
-		return nil, err
+		log.Println("Create tmp error:", err)
+		return err
 	}
 	defer file.Close()
 
-	_, err = io.Copy(file, content)
+	_, err = io.Copy(file, content.Content)
 	if err != nil {
-		return nil, err
+		log.Println("Copy tmp error:", err)
+		return err
 	}
 	log.Printf("Saved to %s", file.Name())
 
+	repBody, err := PredictContent(file.Name())
+	if err != nil {
+		log.Println("Save file err:", err)
+		return err
+	}
+
+	respString := string(repBody)
+	if _, err = bot.ReplyMessage(replyToken, linebot.NewTextMessage(respString)).Do(); err != nil {
+		log.Print(err)
+		return err
+	}
+	return nil
+}
+
+// PredictContent :
+func PredictContent(filename string) ([]byte, error) {
+
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
-	fw, err := w.CreateFormFile("upload", file.Name())
+	fw, err := w.CreateFormFile("upload", filename)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	if _, err = io.Copy(fw, file); err != nil {
+
+	fh, err := os.Open(filename)
+	if err != nil {
+		log.Println("error opening file")
+		return nil, err
+	}
+
+	if _, err = io.Copy(fw, fh); err != nil {
 		log.Println(err)
 		return nil, err
 	}
