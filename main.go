@@ -61,12 +61,12 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 			switch message := event.Message.(type) {
 			case *linebot.ImageMessage:
 				HandleHeavyContent(message.ID)
-				content, err := bot.GetMessageContent(message.ID).Do()
-				if err != nil {
-					log.Println("imageMsg err:", err)
-				}
-				defer content.Content.Close()
-				log.Println("Img content:", content)
+				// // content, err := bot.GetMessageContent(message.ID).Do()
+				// // if err != nil {
+				// // 	log.Println("imageMsg err:", err)
+				// // }
+				// // defer content.Content.Close()
+				// log.Println("Img content:", content)
 
 			case *linebot.TextMessage:
 				ret := luisAction.Predict(message.Text)
@@ -166,13 +166,13 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 	}
 	log.Printf("Saved to %s", file.Name())
 
-	res, err := http.Post("http://107.167.183.27:3000/api/v1/tf-image", "binary/octet-stream", file)
+	res, err := http.Post("http://107.167.183.27:3000/api/v1/tf-image/", "binary/octet-stream", file)
 	if err != nil {
 		panic(err)
 	}
 	defer res.Body.Close()
 	message, _ := ioutil.ReadAll(res.Body)
-	fmt.Printf(string(message))
+	fmt.Printf("Ret:%s", string(message))
 
 	return file, nil
 }
