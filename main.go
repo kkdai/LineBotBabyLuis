@@ -13,10 +13,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 
@@ -166,13 +168,53 @@ func SaveContent(content io.ReadCloser) (*os.File, error) {
 	}
 	log.Printf("Saved to %s", file.Name())
 
-	res, err := http.Post("http://107.167.183.27:3000/api/v1/tf-image/", "binary/octet-stream", file)
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+	fw, err := w.CreateFormFile("image", file.Name())
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	defer res.Body.Close()
-	message, _ := ioutil.ReadAll(res.Body)
-	fmt.Printf("Ret:%s", string(message))
+	if _, err = io.Copy(fw, file); err != nil {
+		return nil, err
+	}
+	// Add the other fields
+	if fw, err = w.CreateFormField("key"); err != nil {
+		return nil, err
+	}
+	if _, err = fw.Write([]byte("KEY")); err != nil {
+		return nil, err
+	}
+	// Don't forget to close the multipart writer.
+	// If you don't close it, your request will be missing the terminating boundary.
+	w.Close()
+
+	// Now that you have a form, you can submit it to your handler.
+	req, err := http.NewRequest("POST", "http://107.167.183.27:3000/api/v1/tf-image/", &b)
+	if err != nil {
+		return nil, err
+	}
+	// Don't forget to set the content type, this will contain the boundary.
+	req.Header.Set("Content-Type", w.FormDataContentType())
+
+	// Submit the request
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check the response
+	if res.StatusCode != http.StatusOK {
+		err = fmt.Errorf("bad status: %s", res.Status)
+	}
+
+	// res, err := http.Post("http://107.167.183.27:3000/api/v1/tf-image/", "binary/octet-stream", file)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer res.Body.Close()
+	// message, _ := ioutil.ReadAll(res.Body)
+	// fmt.Printf("Ret:%s", string(message))
 
 	return file, nil
 }
