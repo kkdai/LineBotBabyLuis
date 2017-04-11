@@ -13,12 +13,8 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"os"
 
@@ -30,8 +26,6 @@ var bot *linebot.Client
 var luisAction *LuisAction
 var allIntents *luis.IntentListResponse
 var currentUtterance string
-
-var APIURL string = "http://107.167.183.27:3000/api/v1/tf-image/"
 
 func main() {
 	var err error
@@ -63,9 +57,6 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	for _, event := range events {
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
-			case *linebot.ImageMessage:
-				HandleImage(message, event.ReplyToken)
-
 			case *linebot.TextMessage:
 				ret := luisAction.Predict(message.Text)
 
@@ -125,106 +116,4 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 		log.Print(err)
 	}
 	currentUtterance = utterance
-}
-
-//HandleImage :
-func HandleImage(message *linebot.ImageMessage, replyToken string) error {
-	content, err := bot.GetMessageContent(message.ID).Do()
-	if err != nil {
-		log.Println("Get msg err:", err)
-		return err
-	}
-	defer content.Content.Close()
-	log.Printf("Got file: %s", content.ContentType)
-
-	file, err := ioutil.TempFile("/tmp", "")
-	if err != nil {
-		log.Println("Create tmp error:", err)
-		return err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, content.Content)
-	if err != nil {
-		log.Println("Copy tmp error:", err)
-		return err
-	}
-	log.Printf("Saved to %s", file.Name())
-
-	repBody, err := PredictContent(file.Name())
-	if err != nil {
-		log.Println("Save file err:", err)
-		return err
-	}
-
-	respString := string(repBody)
-	if _, err = bot.ReplyMessage(replyToken, linebot.NewTextMessage(respString)).Do(); err != nil {
-		log.Print(err)
-		return err
-	}
-	return nil
-}
-
-// PredictContent :
-func PredictContent(filename string) ([]byte, error) {
-
-	var b bytes.Buffer
-	w := multipart.NewWriter(&b)
-	fw, err := w.CreateFormFile("upload", filename)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	fh, err := os.Open(filename)
-	if err != nil {
-		log.Println("error opening file")
-		return nil, err
-	}
-
-	if _, err = io.Copy(fw, fh); err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	// Don't forget to close the multipart writer.
-	// If you don't close it, your request will be missing the terminating boundary.
-	if err = w.Close(); err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	log.Printf("Total file length: %d \n", b.Len())
-	// Now that you have a form, you can submit it to your handler.
-	req, err := http.NewRequest("POST", APIURL, &b)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	// Don't forget to set the content type, this will contain the boundary.
-	req.Header.Set("Content-Type", w.FormDataContentType())
-	log.Println("data content type:", w.FormDataContentType())
-
-	// Submit the request
-	client := &http.Client{}
-	res, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	// Check the response
-	if res.StatusCode != http.StatusOK {
-		err = fmt.Errorf("bad status: %s", res.Status)
-		log.Println(err)
-	}
-
-	defer res.Body.Close()
-	resp_body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Println("Successed: ", string(resp_body))
-	return resp_body, nil
 }
