@@ -14,14 +14,16 @@ const (
 	JsonContent   string = "application/json"
 )
 
+//Client:
 type Client struct {
 	key string
 }
 
-// New oxford client based on key
+//NewClient: New oxford client based on key
 func NewClient(key string) *Client {
 	c := new(Client)
 	c.key = key
+
 	return c
 }
 
@@ -47,6 +49,7 @@ func (c *Client) Connect(mode string, url string, data *bytes.Buffer, useJson bo
 	r.Header.Add("Ocp-Apim-Subscription-Key", c.key)
 	ret := new(ErrorResponse)
 	resp, err := client.Do(r)
+
 	if err != nil {
 		log.Println("er:", err)
 		ret.Err = err
@@ -60,7 +63,7 @@ func (c *Client) Connect(mode string, url string, data *bytes.Buffer, useJson bo
 		return nil, ret
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode > http.StatusAccepted {
 		ret.ErrorCode = resp.StatusCode
 		ret.Err = errors.New("Error on:" + string(body))
 		log.Println("Error happen! body:", string(body))
