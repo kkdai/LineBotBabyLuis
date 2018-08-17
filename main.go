@@ -105,7 +105,7 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 
 	var sliceTemplateAction []linebot.TemplateAction
 	for _, v := range intents {
-		sliceTemplateAction = append(sliceTemplateAction, linebot.NewPostbackAction(v, v, v, v))
+		sliceTemplateAction = append(sliceTemplateAction, linebot.NewPostbackAction(v, v, v, ""))
 	}
 
 	template := linebot.NewButtonsTemplate("", "Select your intent for your baby", utterance, sliceTemplateAction...)
