@@ -81,12 +81,11 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 				ret := luisAction.Predict(message.Text)
 				if ret.Intent == "None" || ret.Intent == "" || ret.Score < 0.5 {
-
 					//List all intents
 					ListAllIntents(bot, event.ReplyToken, intentList, message.Text)
 
 				} else {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to %s (%d %%)", ret.Intent, int(ret.Score*100)))).Do(); err != nil {
+					if _, err := bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to %s (%d %%)", ret.Intent, int(ret.Score*100)))).Do(); err != nil {
 						log.Print(err)
 					}
 				}
