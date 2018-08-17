@@ -17,6 +17,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	luis "github.com/kkdai/luis"
 	"github.com/line/line-bot-sdk-go/linebot"
@@ -60,22 +61,27 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("event.Type == EventTypeMessage")
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				ret := luisAction.Predict(message.Text)
-
-				if ret.Intent == "None" || ret.Intent == "" || ret.Score < 0.5 {
-
-					res, err := luisAction.GetIntents()
-					if err != nil {
-						log.Println(err)
+				res, err := luisAction.GetIntents()
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				var intentList []string
+				log.Println("All intent:", *res)
+				for _, v := range *res {
+					if strings.EqualFold(message.Text, v.Name) {
+						//if input text equal to intents, just leave. (ignore dual event on post action)
 						return
 					}
-					var intentList []string
-					log.Println("All intent:", *res)
-					for _, v := range *res {
-						if v.Name != "None" {
-							intentList = append(intentList, v.Name)
-						}
+
+					if v.Name != "None" {
+						intentList = append(intentList, v.Name)
 					}
+				}
+
+				ret := luisAction.Predict(message.Text)
+				if ret.Intent == "None" || ret.Intent == "" || ret.Score < 0.5 {
+
 					//List all intents
 					ListAllIntents(bot, event.ReplyToken, intentList, message.Text)
 
