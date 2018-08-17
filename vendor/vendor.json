@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "0JiMwbdEFtTqTxSeYXmgXliCJ3A=",
+			"checksumSHA1": "Z9aJlSS6ql75U+y1VizF0VUI5/c=",
 			"path": "github.com/kkdai/luis",
-			"revision": "5304bfd6b0152bbeed81254cf09c71b2766e72ab",
-			"revisionTime": "2018-08-16T01:52:34Z"
+			"revision": "25a3e168f5a85d6b607e017f4f4765a16ad8276f",
+			"revisionTime": "2018-08-17T06:06:20Z"
 		},
 		{
 			"checksumSHA1": "0nIFK6e0pFLkwBgR5aVjMyGGFTY=",
