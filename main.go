@@ -55,7 +55,8 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, event := range events {
-		if event.Type == linebot.EventTypeMessage {
+		switch event.Type {
+		case linebot.EventTypeMessage:
 			log.Println("event.Type == EventTypeMessage")
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
@@ -84,7 +85,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
-		} else if event.Type == linebot.EventTypePostback {
+		case linebot.EventTypePostback:
 			log.Println("event.Type == linebot.EventTypePostback")
 			//Add new utterance into original intent
 			luisAction.AddUtterance(event.Postback.Data, currentUtterance)
@@ -96,6 +97,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 			//Train it right away
 			luisAction.Train()
+			return
 		}
 	}
 }
