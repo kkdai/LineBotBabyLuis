@@ -60,7 +60,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 			case *linebot.TextMessage:
 				ret := luisAction.Predict(message.Text)
 
-				if ret.Name == "None" || ret.Name == "" || ret.Score < 0.5 {
+				if ret.Intent == "None" || ret.Intent == "" || ret.Score < 0.5 {
 
 					res, err := luisAction.GetIntents()
 					if err != nil {
@@ -78,7 +78,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 					ListAllIntents(bot, event.ReplyToken, intentList, message.Text)
 
 				} else {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to %s (%d %%)", ret.Name, int(ret.Score*100)))).Do(); err != nil {
+					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(fmt.Sprintf("Daddy/Mommy, I just want to %s (%d %%)", ret.Intent, int(ret.Score*100)))).Do(); err != nil {
 						log.Print(err)
 					}
 				}
@@ -105,7 +105,7 @@ func ListAllIntents(bot *linebot.Client, replyToken string, intents []string, ut
 
 	var sliceTemplateAction []linebot.TemplateAction
 	for _, v := range intents {
-		sliceTemplateAction = append(sliceTemplateAction, linebot.NewPostbackTemplateAction(v, v, ""))
+		sliceTemplateAction = append(sliceTemplateAction, linebot.NewPostbackAction(v, v, v, v))
 	}
 
 	template := linebot.NewButtonsTemplate("", "Select your intent for your baby", utterance, sliceTemplateAction...)

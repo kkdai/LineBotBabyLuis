@@ -20,7 +20,7 @@ func NewLuisAction(appid string, appkey string) *LuisAction {
 
 //GetIntents :
 func (l *LuisAction) GetIntents() (*luis.IntentListResponse, *luis.ErrorResponse) {
-	res, err := l.LuisAPI.IntentList()
+	res, err := l.LuisAPI.IntelList()
 	if err != nil {
 		return nil, err
 	}
@@ -43,13 +43,13 @@ func (l *LuisAction) AddUtterance(intent, utterance string) {
 
 //Predict :Predict your example(utterance).
 //Note: If your model never train before, use predict will get error.
-func (l *LuisAction) Predict(utterance string) luis.IntentsResultType {
+func (l *LuisAction) Predict(utterance string) luis.IntentScore {
 	//Predict it, once you have train your models.
 	res, err := l.LuisAPI.Predict(utterance)
 
 	if err != nil {
 		log.Println("Error happen on Predict:", err.Err)
-		return luis.IntentsResultType{}
+		return luis.IntentScore{}
 	}
 	log.Println("Got response:", string(res))
 	bestResult := luis.GetBestScoreIntent(luis.NewPredictResponse(res))
