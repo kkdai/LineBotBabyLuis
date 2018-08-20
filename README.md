@@ -47,8 +47,18 @@ Because this project is just a POC (Proof of Concept), so it still don't support
 
 It might have some issues if multiple user on line.
 
+Sequence Diagram
+---------------
 
-How to write your LUIS Chatbot in Golang
+![](images/luis_predict.png)
+
+(**Sequence diagram**: LUIS could understand what user utterance means)
+
+![](images/luis_learning.png)
+
+(**Sequence Diagram**: If user input could not identify, how LUIS LineBot learn it.)
+
+How to write your own LUIS Chatbot in Golang
 ---------------
 
 
