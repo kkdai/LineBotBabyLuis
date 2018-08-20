@@ -30,7 +30,7 @@ func (l *LuisAction) GetIntents() (*luis.IntentListResponse, *luis.ErrorResponse
 
 //AddUtterance :Add new example to your intent.
 func (l *LuisAction) AddUtterance(intent, utterance string) {
-	ex := luis.ExampleJson{ExampleText: utterance, SelectedIntentName: intent}
+	ex := luis.ExamplePayload{ExampleText: utterance, SelectedIntentName: intent}
 	res, err := l.LuisAPI.AddLabel(ex)
 
 	if err != nil {
@@ -66,4 +66,18 @@ func (l *LuisAction) Train() {
 		return
 	}
 	log.Println("Training ret:", string(res))
+
+	ver, _ := l.LuisAPI.GetCurrentProductionVersion()
+
+	//Need publish right away.
+	res, err = l.LuisAPI.Publish(luis.PublishPayload{
+		VersionID: ver,
+		IsStaging: false,
+		Region:    "westus",
+	})
+	if err != nil {
+		log.Println("Error happen on Publish:", err.Err)
+		return
+	}
+	log.Println("Publish ret:", string(res))
 }
