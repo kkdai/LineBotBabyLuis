@@ -1,0 +1,4 @@
+# github.com/kkdai/luis v1.0.1
+github.com/kkdai/luis
+# github.com/line/line-bot-sdk-go/v7 v7.9.1
+github.com/line/line-bot-sdk-go/v7/linebot
