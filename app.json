@@ -1,6 +1,7 @@
 {
   "name": "LineBotBabyLuis",
   "description": "LineBot with luis feature in Go",
+  "stack": "heroku-22",
   "repository": "https://github.com/kkdai/LineBotBabyLuis",
   "keywords": [
     "Line",
