@@ -1,6 +1,8 @@
 BabyLuisBot: A database-free neural-language learning Line ChatBot
 ==============
 
+[![Go](https://github.com/kkdai/LineBotBabyLuis/actions/workflows/go.yml/badge.svg)](https://github.com/kkdai/LineBotBabyLuis/actions/workflows/go.yml)
+
  [![GoDoc](https://godoc.org/github.com/kkdai/LineBotBabyLuis.svg?status.svg)](https://godoc.org/github.com/kkdai/LineBotBabyLuis)  [![Build Status](https://travis-ci.org/kkdai/LineBotBabyLuis.svg?branch=master)](https://travis-ci.org/kkdai/LineBotBabyLuis.svg)
 
 [![goreportcard.com](https://goreportcard.com/badge/github.com/kkdai/LineBotBabyLuis)](https://goreportcard.com/report/github.com/kkdai/LineBotBabyLuis)
